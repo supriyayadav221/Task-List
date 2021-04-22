@@ -9,12 +9,48 @@ const taskInput = document.querySelector('#task');
 loadEventListeners();
 
 function loadEventListeners() {
+  document.addEventListener('DOMContentLoaded',getTasks);
 //Add event
   form.addEventListener('submit', addTask);
 //Remove item
 taskList.addEventListener('click',removeTask);
 //Clear whole taskList
 clearBtn.addEventListener('click',clearTask);
+//Filter Task
+filter.addEventListener('keyup',filterTasks);
+}
+
+function getTasks()
+{
+  let tasks;
+  if(localStorage.getItem('tasks')=== null)
+  {
+    tasks=[];
+  }
+  else{
+    tasks=JSON.parse(localStorage.getItem('tasks'));
+  }
+tasks.forEach(function(task){
+
+  const li = document.createElement('li');
+
+  li.className = 'collection-item';
+  
+  li.appendChild(document.createTextNode(task));
+ 
+  const link = document.createElement('a');
+
+  link.className = 'delete-item secondary-content';
+
+  link.innerHTML = '<i class="fa fa-remove"></i>';
+ 
+  li.appendChild(link);
+
+ 
+  taskList.appendChild(li);
+});
+
+
 }
 
 
@@ -41,10 +77,27 @@ function addTask(e) {
  
   taskList.appendChild(li);
 
+  storeInLocalStorage(taskInput.value);
+
  
   taskInput.value = '';
 
   e.preventDefault();
+}
+
+function storeInLocalStorage(task)
+{
+  let tasks;
+  if(localStorage.getItem('tasks')=== null)
+  {
+    tasks=[];
+  }
+  else{
+    tasks=JSON.parse(localStorage.getItem('tasks'));
+  }
+
+  tasks.push(task);
+  localStorage.setItem('tasks',JSON.stringify(tasks));
 }
 
 function removeTask(e)
@@ -54,7 +107,30 @@ function removeTask(e)
     if(confirm('Are you sure?')){
     e.target.parentElement.parentElement.remove();
   }}
+
+  removeTaskFromLocalStorage(e.target.parentElement.parentElement);
 }
+function removeTaskFromLocalStorage(taskItem)
+{
+  let tasks;
+  if(localStorage.getItem('tasks')=== null)
+  {
+    tasks=[];
+  }
+  else{
+    tasks=JSON.parse(localStorage.getItem('tasks'));
+  }
+  tasks.forEach(function(task,index)
+  {
+if(taskItem.textContent ===task)
+{tasks.splice(index,1);}
+  });
+
+  localStorage.setItem('tasks',JSON.stringify(tasks));
+
+}
+
+
 
 function clearTask()
 {
@@ -64,4 +140,29 @@ function clearTask()
   {
     taskList.removeChild(taskList.firstChild);
   }}
+
+  clearTasksFromLocalStorage();
+}
+
+function clearTasksFromLocalStorage()
+{
+  localStorage.clear();
+}
+
+function filterTasks(e)
+{
+  const text= e.target.value.toLowerCase();
+  document.querySelectorAll('.collection-item').forEach
+  (function(task)
+  {
+    const item=task.firstChild.textContent;
+    if(item.toLowerCase().indexOf(text) != -1)
+    {
+      task.style.display = 'block';
+    }
+    else{
+      task.style.display='none';
+    }
+  });
+  
 }
